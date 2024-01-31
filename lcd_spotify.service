@@ -1,0 +1,11 @@
+[Unit]
+Description=Spotify LCD Display Service
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/home/$USERNAME/bin/lcd_spotify.sh
+PIDFile=/tmp/lcd-spotify/lcd-spotify.pid
+
+[Install]
+WantedBy=multi-user.target

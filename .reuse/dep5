@@ -1,0 +1,12 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Display currently playing Spotify track on LCD attached to Raspberry Pi
+Upstream-Contact: Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+Source: https://github.com/staceybellerose/lcd_spotify
+
+Files: .vscode/*
+Copyright: © 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+License: CC0-1.0
+
+Files: images/*
+Copyright: © 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+License: MIT

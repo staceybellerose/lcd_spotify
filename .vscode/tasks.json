@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Deploy current file to Raspberry Pi",
+      "type": "shell",
+      "command": "scp ${file} ${input:remotehost}:${input:remotepath}/",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy project to Raspberry Pi",
+      "type": "shell",
+      "command": "scp -r ${workspaceFolder}/* ${input:remotehost}:${input:remotepath}/",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "remotehost",
+      "type": "command",
+      "command": "extension.commandvariable.promptStringRemember",
+      "args": {
+        "key": "remotehost",
+        "description": "Remote server (user@host):"
+      }
+    },
+    {
+      "id": "remotepath",
+      "type": "command",
+      "command": "extension.commandvariable.promptStringRemember",
+      "args": {
+        "key": "remotepath",
+        "description": "Remote path:",
+        "default": "projects/spotify"
+      },
+    }
+  ]
+}
