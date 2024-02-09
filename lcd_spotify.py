@@ -111,6 +111,11 @@ class LCD_Spotify:
         self.init_spotify()
         self.current_track = None
         self.last_track = None
+        self.offsets = {
+            "album": 0,
+            "artist": 0,
+            "track": 0,
+        }
 
     def str_to_bool(self, val, default=False):
         """Convert a string representation of truth to True or False.
@@ -229,7 +234,7 @@ class LCD_Spotify:
             eprint(traceback.format_exc())
             eprint("Warning: Spotify call timed out")
 
-    def offset_display_data(self):
+    def increment_display_offsets(self):
         """
         Return the offset numbers for the display data.
         """
@@ -238,23 +243,22 @@ class LCD_Spotify:
                 f"{self.current_track.artist}::{self.current_track.name}::{self.current_track.album}"
             )
             self.last_track = self.current_track
-            offset_artist = 0
-            offset_track = 0
-            offset_album = 0
+            self.offsets["artist"] = 0
+            self.offsets["album"] = 0
+            self.offsets["track"] = 0
         else:
-            offset_artist = self.add_to_max(
-                offset_artist, 1,
+            self.offsets["artist"] = self.add_to_max(
+                self.offsets["artist"], 1,
                 len(self.current_track.artist) + len(WRAP_PAD)
             )
-            offset_track = self.add_to_max(
-                offset_track, 1,
+            self.offsets["track"] = self.add_to_max(
+                self.offsets["track"], 1,
                 len(self.current_track.name) + len(WRAP_PAD)
             )
-            offset_album = self.add_to_max(
-                offset_album, 1,
+            self.offsets["album"] = self.add_to_max(
+                self.offsets["album"], 1,
                 len(self.current_track.album) + len(WRAP_PAD)
             )
-        return (offset_artist, offset_track, offset_album)
 
     def offset_wrap(self, string, offset):
         """
@@ -279,10 +283,10 @@ class LCD_Spotify:
                 artist_display = extended_lcd.CGRAM_CHR1 + self.current_track.artist
             else:
                 artist_display = self.current_track.artist
-            (offset_artist, offset_track, offset_album) = self.offset_display_data()
-            artist = self.offset_wrap(artist_display, offset_artist)
-            track = self.offset_wrap(self.current_track.name, offset_track)
-            album = self.offset_wrap(self.current_track.album, offset_album)
+            self.increment_display_offsets()
+            artist = self.offset_wrap(artist_display, self.offsets["artist"])
+            track = self.offset_wrap(self.current_track.name, self.offsets["track"])
+            album = self.offset_wrap(self.current_track.album, self.offsets["album"])
             self.lcd.text(artist, 1)
             self.lcd.text(track, 2)
             if self.lcd.rows > 2:
