@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-License-Identifier: MIT
+
+sudo kill -14 "$(< /tmp/lcd-spotify/lcd-spotify.pid)"

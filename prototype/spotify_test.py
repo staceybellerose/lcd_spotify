@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Prototype showing how to connect to spotify and retrieve the currently playing track.
+"""
+
 # SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
 # SPDX-License-Identifier: MIT
 

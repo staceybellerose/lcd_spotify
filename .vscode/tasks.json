@@ -4,13 +4,13 @@
     {
       "label": "Deploy current file to Raspberry Pi",
       "type": "shell",
-      "command": "scp ${file} ${input:remotehost}:${input:remotepath}/",
+      "command": "scp ${relativeFile} ${input:remotehost}:${input:remotepath}/${relativeFile}",
       "problemMatcher": []
     },
     {
       "label": "Deploy project to Raspberry Pi",
       "type": "shell",
-      "command": "scp -r ${workspaceFolder}/* ${input:remotehost}:${input:remotepath}/",
+      "command": "scp -r ${workspaceFolder}${/}* ${input:remotehost}:${input:remotepath}/",
       "problemMatcher": []
     }
   ],

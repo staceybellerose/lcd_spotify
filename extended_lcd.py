@@ -78,9 +78,13 @@ class ExtendedLcd(LCD):
     """
     Extended LCD class with convenience functions.
     """
-    def save_cgram_char(self, slot, bytedata):
+    def save_cgram_char(self, slot: int, bytedata):
         """
-        Load bytedata into LCD's CGRAM
+        Load bytedata into LCD's CGRAM.
+
+        Parameters:
+            * slot: An integer between 0 and 7, inclusive
+            * bytedata: A list of 8 bytes with values between 0x00 and 0x1F, inclusive
         """
         if slot < 0 or slot > 7:
             raise ValueError(f"Value {slot} out of range")
@@ -92,22 +96,36 @@ class ExtendedLcd(LCD):
         for byte in bytedata:
             self.write(byte, mode=1)
 
-    def position_text(self, text, line, column=1):
+    def position_text(self, text: str, line: int, column: int = 1):
         """
         Display text at a given position on the LCD screen.
 
-        text: the string to display
-        line: the line to display the text
-        column: the starting column for the text
+        Parameters:
+            * text: The string to display on the LCD
+            * line: The line to display the text
+            * column: The starting column for the text
 
         Note: both line and column are 1-based numbers, NOT 0-based
         """
         if line < 1 or line > self.rows:
             raise ValueError(f"Line {line} out of range")
         if column < 1 or column > self.width:
-            raise ValueError("Column {column} out of range")
+            raise ValueError(f"Column {column} out of range")
         self.write(LINES.get(line, LINES[1] | (column - 1)))
-        for idx, ch in text:
+        for idx, ch in enumerate(text):
             self.write(ord(ch), mode=1)
             if column + idx > self.width:
                 break
+
+    def toggle_backlight(self):
+        """
+        Toggle the backlight.
+        """
+        self.backlight(not self.backlight_status)
+
+    def clear(self):
+        """
+        Clear the LCD and turn off the backlight.
+        """
+        super().clear()
+        self.backlight(False)
