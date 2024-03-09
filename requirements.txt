@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
-# SPDX-License-Identifier: CC0-1.0
-psutil==5.9.4
+# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose@gmail.com>
+# SPDX-License-Identifier: Unlicense
+psutil >= 5.8.0, < 6.0
 python-dotenv==0.21.0
-requests==2.25.1
+requests >= 2.25.0, < 3.0
 rpi_lcd==0.0.3
 smbus==1.1.post2
-spotipy==2.22.0
+spotipy >= 2.20.0, < 3.0

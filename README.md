@@ -88,7 +88,7 @@ dtoverlay=gpio-shutdown,gpio_pin=$pin$
 ```
 
 <!--
-SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose@gmail.com>
 
 SPDX-License-Identifier: MIT
 -->

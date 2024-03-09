@@ -2,7 +2,7 @@
 Various utility functions.
 """
 
-# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
 import sys
@@ -10,6 +10,7 @@ import socket
 import traceback
 
 import psutil
+
 
 def eprint(*args, **kwargs):
     """
@@ -87,6 +88,7 @@ def substr_wrap(string: str, start: int, length: int, wrap_pad: str = "") -> str
     string = string + wrap_pad
     chrs = [string[add_to_max(start, i, len(string))] for i in range(length)]
     return "".join(chrs)
+
 
 def dump_traceback(message: str = ""):
     """

@@ -4,7 +4,7 @@
 Prototype showing how to connect to spotify and retrieve the currently playing track.
 """
 
-# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
 import dotenv
@@ -14,13 +14,13 @@ from spotipy.oauth2 import SpotifyOAuth
 
 CACHEFILE = "../.cache-spotipy"
 
-dotenv.load_dotenv(dotenv_path = "../config.env")
+dotenv.load_dotenv(dotenv_path="../config.env")
 
-scope = "user-read-playback-state user-library-read"
+SCOPE = "user-read-playback-state user-library-read"
 
 sp = spotipy.Spotify(
     auth_manager=SpotifyOAuth(
-        scope=scope,
+        scope=SCOPE,
         open_browser=False,
         cache_handler=CacheFileHandler(cache_path=CACHEFILE)
     )

@@ -2,7 +2,7 @@
 Display currently playing Spotify track on LCD.
 """
 
-# SPDX-FileCopyrightText: © 2022, 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-FileCopyrightText: © 2022, 2024 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
 import signal
@@ -22,7 +22,7 @@ CONFIGFILE = "config.env"
 WRAP_PAD = " " * 4
 
 
-class LCD_Spotify:
+class LcdSpotify:
     """
     Display currently playing Spotify track on LCD.
     """
@@ -37,7 +37,7 @@ class LCD_Spotify:
             "LCD_ADDRESS": 0x27,
             "LCD_WIDTH": 16,
             "LCD_ROWS": 2,
-            **dotenv.dotenv_values(dotenv_path=CONFIGFILE) # load config overrides
+            **dotenv.dotenv_values(dotenv_path=CONFIGFILE)  # load config overrides
         }
         # convert from string to proper type for config values
         self.config["LCD_BACKLIGHT"] = tools.str_to_bool(self.config["LCD_BACKLIGHT"], True)
@@ -176,13 +176,14 @@ def main() -> NoReturn:
             lcd_spotify.reset_countdown()
         elif signum == signal.SIGALRM:
             lcd_spotify.spotify_manager.next_track()
-        elif signum in (signal.SIGINT, signal.SIGTERM):
+        elif signum in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
             lcd_spotify.lcd.clear()
             sys.exit(0)
         else:
             tools.eprint("Unknown signal received.")
 
-    lcd_spotify = LCD_Spotify()
+    lcd_spotify = LcdSpotify()
+    signal.signal(signal.SIGHUP, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGUSR1, signal_handler)

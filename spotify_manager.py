@@ -2,10 +2,11 @@
 Spotify API Manager.
 """
 
-# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
 import dataclasses
+from typing import Optional
 
 import requests
 import spotipy
@@ -57,7 +58,7 @@ class SpotifyManager():
     """
     Spotify API Manager.
     """
-    def __init__(self, client_id=None, client_secret=None, redirect_uri=None):
+    def __init__(self, client_id=None, client_secret=None, redirect_uri=None) -> None:
         self.sp = spotipy.Spotify(
             auth_manager=SpotifyOAuth(
                 client_id=client_id,
@@ -68,8 +69,8 @@ class SpotifyManager():
                 cache_handler=CacheFileHandler(cache_path=CACHEFILE)
             )
         )
-        self.current_track: TrackData = None
-        self.last_track: TrackData = None
+        self.current_track: Optional[TrackData] = None
+        self.last_track: Optional[TrackData] = None
 
     def next_track(self):
         """
@@ -131,25 +132,25 @@ class SpotifyManager():
         """
         Get the current track's artist name.
         """
-        return self.current_track.artist
+        return self.current_track.artist if self.current_track is not None else ""
 
     def get_album_name(self) -> str:
         """
         Get the current track's album name.
         """
-        return self.current_track.album
+        return self.current_track.album if self.current_track is not None else ""
 
     def get_track_name(self) -> str:
         """
         Get the current track's name.
         """
-        return self.current_track.name
+        return self.current_track.name if self.current_track is not None else ""
 
     def is_track_liked(self) -> bool:
         """
         Determine if the current track is liked.
         """
-        return self.current_track.is_liked
+        return self.current_track.is_liked if self.current_track is not None else False
 
     def is_track_playing(self) -> bool:
         """

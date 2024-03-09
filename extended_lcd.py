@@ -2,7 +2,7 @@
 Extended LCD class with convenience functions.
 """
 
-# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose [AT] gmail [DOT] com>
+# SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
 from rpi_lcd import LCD, LINES
@@ -74,11 +74,12 @@ CHR_BATTERY_FULL  = CHR_BATTERY6
 
 # more custom characters can be designed at https://maxpromer.github.io/LCD-Character-Creator/
 
+
 class ExtendedLcd(LCD):
     """
     Extended LCD class with convenience functions.
     """
-    def save_cgram_char(self, slot: int, bytedata):
+    def save_cgram_char(self, slot: int, bytedata: list[int]):
         """
         Load bytedata into LCD's CGRAM.
 
