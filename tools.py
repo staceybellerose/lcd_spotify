@@ -8,6 +8,7 @@ Various utility functions.
 import sys
 import socket
 import traceback
+from unicodedata import combining, normalize
 
 import psutil
 
@@ -95,3 +96,15 @@ def dump_traceback(message: str = ""):
     Print a traceback and optional message to stderr using eprint.
     """
     eprint(traceback.format_exc(), message, sep="\n")
+
+
+LATIN = "ä æ  ǽ  đ ð ƒ ħ ı ł ø ǿ ö œ  ß  ŧ þ  ü Ä Æ  Ǽ  Đ Ð Ƒ Ħ I Ł Ø Ǿ Ö Œ  ẞ  Ŧ Þ  Ü"
+ASCII = "a ae ae d d f h i l o o o oe ss t th u A AE AE D D F H I L O O O OE SS T TH U"
+outliers = str.maketrans(dict(zip(LATIN.split(), ASCII.split())))
+
+
+def remove_diacritics(s: str) -> str:
+    """
+    Remove diacritics from the provided string.
+    """
+    return "".join(c for c in normalize("NFD", s.translate(outliers)) if not combining(c))

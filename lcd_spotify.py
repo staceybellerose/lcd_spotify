@@ -141,10 +141,11 @@ class LcdSpotify:
             self.lcd.text(f"HOST: {tools.gethostname()}", 1, "center")
             self.lcd.text(f"IP: {tools.net_addr()}", 2, "center")
         elif self.spotify_manager.is_track_playing():
+            artist_name = tools.remove_diacritics(self.spotify_manager.get_artist())
             if self.spotify_manager.is_track_liked():
-                artist_display = extended_lcd.CGRAM_CHR1 + self.spotify_manager.get_artist()
+                artist_display = extended_lcd.CGRAM_CHR1 + artist_name
             else:
-                artist_display = self.spotify_manager.get_artist()
+                artist_display = artist_name
             self.increment_display_offsets()
             artist = self.offset_wrap(artist_display, self.offsets["artist"])
             track = self.offset_wrap(self.spotify_manager.get_track_name(), self.offsets["track"])
