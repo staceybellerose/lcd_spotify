@@ -6,3 +6,4 @@ requests >= 2.25.0, < 3.0
 rpi_lcd==0.0.3
 smbus==1.1.post2
 spotipy >= 2.20.0, < 3.0
+typing-extensions >= 4.10

@@ -46,13 +46,13 @@ Create a new [Spotify App](https://developer.spotify.com/documentation/web-api/t
 
 Copy `config.env.sample` to `config.env` and add your Spotify Client ID and Secret.
 
-Install the necessary modules:
+Install the necessary modules (as root, as the systemd service requires it):
 
 ```bash
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 ```
 
-Edit `bin/lcd_spotify.sh` to reflect the location of this project.
+Edit `bin/lcd_spotify.sh` to reflect the absolute path of this project.
 
 Copy the scripts to a folder in your path:
 
@@ -80,7 +80,7 @@ sudo systemctl start lcd_spotify.service
 
 * Connect one side of the button to a GND pin on the Raspberry Pi GPIO header.
 * Connect the other side of the button to a numbered GPIO pin.
-* Default location is GPIO 3, but this conflicts with I2C bus.
+* Default location is GPIO 3, but this conflicts with I2C bus, which controls the LCD.
 * Add the following line to `/boot/config.txt` replacing `$pin$` with the chosen pin ID.
 
 ```bash

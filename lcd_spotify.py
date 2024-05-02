@@ -5,15 +5,15 @@ Display currently playing Spotify track on LCD.
 # SPDX-FileCopyrightText: © 2022, 2024 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
-import signal
-import sys
+from __future__ import annotations
+
+import logging
 import time
-from typing import NoReturn
+from contextlib import suppress
 
-import dotenv
-
-import tools
 import extended_lcd
+import tools
+from config import Config
 from extended_lcd import ExtendedLcd
 from spotify_manager import SpotifyManager
 
@@ -21,63 +21,54 @@ BIPS = 4
 CONFIGFILE = "config.env"
 WRAP_PAD = " " * 4
 
+logger = logging.getLogger(__name__)
+
 
 class LcdSpotify:
     """
     Display currently playing Spotify track on LCD.
     """
-    def load_config(self):
+
+    def load_config(self) -> None:
         """
         Load configuration from config file.
         """
-        self.config = {
-            "LCD_BACKLIGHT": True,
-            "IP_TIMEOUT": 10,
-            "I2C_BUS": 1,
-            "LCD_ADDRESS": 0x27,
-            "LCD_WIDTH": 16,
-            "LCD_ROWS": 2,
-            **dotenv.dotenv_values(dotenv_path=CONFIGFILE)  # load config overrides
-        }
-        # convert from string to proper type for config values
-        self.config["LCD_BACKLIGHT"] = tools.str_to_bool(self.config["LCD_BACKLIGHT"], True)
-        self.config["IP_TIMEOUT"] = int(self.config["IP_TIMEOUT"])
-        self.config["LCD_ADDRESS"] = int(self.config["LCD_ADDRESS"], 16)
-        self.config["I2C_BUS"] = int(self.config["I2C_BUS"])
-        self.config["LCD_WIDTH"] = int(self.config["LCD_WIDTH"])
-        self.config["LCD_ROWS"] = int(self.config["LCD_ROWS"])
+        self.config = Config.load_from_file(CONFIGFILE)
+        logger.debug("Loaded config: %s", self.config)
 
-    def init_hardware(self):
+    def init_hardware(self) -> None:
         """
         Initialize the LCD.
         """
         self.lcd = ExtendedLcd(
-            address=self.config["LCD_ADDRESS"],
-            bus=self.config["I2C_BUS"],
-            width=self.config["LCD_WIDTH"],
-            rows=self.config["LCD_ROWS"],
-            backlight=self.config["LCD_BACKLIGHT"]
+            address=self.config.lcd_address,
+            bus=self.config.i2c_bus,
+            width=self.config.lcd_width,
+            rows=self.config.lcd_rows,
+            backlight=self.config.lcd_backlight
         )
         self.lcd.save_cgram_char(
             slot=extended_lcd.CGRAM_SLOT1,
             bytedata=extended_lcd.CHR_HEART
         )
+        logger.debug("LCD initialized: %s", self.lcd)
 
-    def init_spotify(self):
+    def init_spotify(self) -> None:
         """
         Initialize Spotify Web API.
         """
         self.spotify_manager = SpotifyManager(
-            client_id=self.config["SPOTIPY_CLIENT_ID"],
-            client_secret=self.config["SPOTIPY_CLIENT_SECRET"],
-            redirect_uri=self.config["SPOTIPY_REDIRECT_URI"],
+            client_id=self.config.spotipy_client_id,
+            client_secret=self.config.spotipy_client_secret,
+            redirect_uri=self.config.spotipy_redirect_uri,
         )
+        logger.debug("Spotify API initialized")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.load_config()
         self.init_hardware()
         self.init_spotify()
-        self.countdown = 0
+        self.countdown = 0.0
         self.bip = 0
         self.offsets = {
             "album": 0,
@@ -85,22 +76,22 @@ class LcdSpotify:
             "track": 0,
         }
 
-    def reset_countdown(self):
+    def reset_countdown(self) -> None:
         """
         Reset the countdown timer.
         """
         self.countdown = time.time()
 
-    def increment_display_offsets(self):
+    def increment_display_offsets(self) -> None:
         """
         Return the offset numbers for the display data.
         """
         if self.spotify_manager.update_last_track():
-            tools.eprint(
+            logger.info(
+                "%s::%s::%s",
                 self.spotify_manager.get_artist(),
                 self.spotify_manager.get_track_name(),
                 self.spotify_manager.get_album_name(),
-                sep="::"
             )
             self.offsets["artist"] = 0
             self.offsets["album"] = 0
@@ -121,11 +112,16 @@ class LcdSpotify:
 
     def offset_wrap(self, string: str, offset: int) -> str:
         """
-        Wrapper to substr_wrap using LCD width for max length.
+        Wrap a string with a given offset, to fit the LCD width.
         """
         return tools.substr_wrap(string, offset, self.lcd.width, WRAP_PAD)
 
-    def single_step(self):
+    def _get_liked_artist(self, artist_name: str) -> str:
+        if self.spotify_manager.is_track_liked():
+            return extended_lcd.CGRAM_CHR1 + artist_name
+        return artist_name
+
+    def single_step(self) -> None:
         """
         Run a single step of display loop.
 
@@ -137,64 +133,29 @@ class LcdSpotify:
         if self.bip == 0:
             self.spotify_manager.retrieve_track_data()
         self.bip = (self.bip + 1) % BIPS
-        if time.time() - self.countdown < self.config["IP_TIMEOUT"]:
+        if time.time() - self.countdown < self.config.ip_timeout:
             self.lcd.text(f"HOST: {tools.gethostname()}", 1, "center")
             self.lcd.text(f"IP: {tools.net_addr()}", 2, "center")
         elif self.spotify_manager.is_track_playing():
             artist_name = tools.remove_diacritics(self.spotify_manager.get_artist())
-            if self.spotify_manager.is_track_liked():
-                artist_display = extended_lcd.CGRAM_CHR1 + artist_name
-            else:
-                artist_display = artist_name
+            artist_display = self._get_liked_artist(artist_name)
             self.increment_display_offsets()
             artist = self.offset_wrap(artist_display, self.offsets["artist"])
-            track = self.offset_wrap(self.spotify_manager.get_track_name(), self.offsets["track"])
-            album = self.offset_wrap(self.spotify_manager.get_album_name(), self.offsets["album"])
-            self.lcd.position_text(artist.ljust(self.lcd.width), 1)
-            self.lcd.position_text(track.ljust(self.lcd.width), 2)
-            if self.lcd.rows > 2:
+            track = self.offset_wrap(
+                tools.remove_diacritics(
+                    self.spotify_manager.get_track_name()
+                ), self.offsets["track"]
+            )
+            album = self.offset_wrap(
+                tools.remove_diacritics(
+                    self.spotify_manager.get_album_name()
+                ), self.offsets["album"]
+            )
+            with suppress(ValueError):
+                self.lcd.position_text(artist.ljust(self.lcd.width), 1)
+                self.lcd.position_text(track.ljust(self.lcd.width), 2)
+                # a 16x2 LCD will throw a ValueError here, but a 20x4 won't
                 self.lcd.position_text(album.ljust(self.lcd.width), 3)
         else:
-            self.lcd.text(time.strftime('%H:%M:%S'), 1, "center")
-            self.lcd.text(time.strftime('%Y-%m-%d'), 2, "center")
-
-
-def main() -> NoReturn:
-    """
-    Entry point function when run from command line.
-    """
-    def signal_handler(*args):
-        """
-        Handle various signals
-        """
-        signum = args[0]
-        tools.eprint(f'Handling signal {signum} ({signal.Signals(signum).name}).')
-        if signum == signal.SIGUSR1:
-            lcd_spotify.lcd.toggle_backlight()
-        elif signum == signal.SIGUSR2:
-            lcd_spotify.spotify_manager.toggle_track_liked()
-        elif signum == signal.SIGIO:
-            lcd_spotify.reset_countdown()
-        elif signum == signal.SIGALRM:
-            lcd_spotify.spotify_manager.next_track()
-        elif signum in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
-            lcd_spotify.lcd.clear()
-            sys.exit(0)
-        else:
-            tools.eprint("Unknown signal received.")
-
-    lcd_spotify = LcdSpotify()
-    signal.signal(signal.SIGHUP, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGUSR1, signal_handler)
-    signal.signal(signal.SIGUSR2, signal_handler)
-    signal.signal(signal.SIGIO, signal_handler)
-    signal.signal(signal.SIGALRM, signal_handler)
-    while True:
-        lcd_spotify.single_step()
-        time.sleep(1 / BIPS)
-
-
-if __name__ == '__main__':
-    main()
+            self.lcd.text(time.strftime("%H:%M:%S"), 1, "center")
+            self.lcd.text(time.strftime("%Y-%m-%d"), 2, "center")

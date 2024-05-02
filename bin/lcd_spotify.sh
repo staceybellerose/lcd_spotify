@@ -3,10 +3,13 @@
 # SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
-mkdir -p /tmp/lcd-spotify/
+TMPFOLDER=/tmp/lcd-spotify-${UID}
+mkdir -p ${TMPFOLDER}/
 cd "$HOME"/projects/spotify || exit
-python3 ./lcd_spotify.py &
+
+# to log debug messages, change /dev/null to an actual file.
+python3 ./__main__.py 2> /dev/null &
 disown
-echo $! > /tmp/lcd-spotify/lcd-spotify.pid
+echo $! > ${TMPFOLDER}/lcd-spotify.pid
 
 exit 0

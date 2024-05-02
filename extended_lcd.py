@@ -5,6 +5,8 @@ Extended LCD class with convenience functions.
 # SPDX-FileCopyrightText: © 2022 Stacey Adams <stacey.belle.rose@gmail.com>
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
 from rpi_lcd import LCD, LINES
 
 # Valid character positions
@@ -74,59 +76,77 @@ CHR_BATTERY_FULL  = CHR_BATTERY6
 
 # more custom characters can be designed at https://maxpromer.github.io/LCD-Character-Creator/
 
+CHR_DATA_LENGTH = 8
+
 
 class ExtendedLcd(LCD):
     """
     Extended LCD class with convenience functions.
     """
-    def save_cgram_char(self, slot: int, bytedata: list[int]):
+
+    def save_cgram_char(self, slot: int, bytedata: list[int]) -> None:
         """
         Load bytedata into LCD's CGRAM.
 
-        Parameters:
-            * slot: An integer between 0 and 7, inclusive
-            * bytedata: A list of 8 bytes with values between 0x00 and 0x1F, inclusive
+        Parameters
+        ----------
+        slot: An integer between 0 and 7, inclusive
+        bytedata: A list of 8 bytes with values between 0x00 and 0x1F, inclusive
         """
-        if slot < 0 or slot > 7:
-            raise ValueError(f"Value {slot} out of range")
+        if not CGRAM_SLOT1 <= slot <= CGRAM_SLOT8:
+            msg = f"Value {slot} out of range"
+            raise ValueError(msg)
         if not isinstance(bytedata, list):
-            raise TypeError(f"Expected list for bytedata, got {type(bytedata)}")
-        if len(bytedata) != 8:
-            raise ValueError("Bytes list must contain exactly 8 values")
+            msg = f"Expected list for bytedata, got {type(bytedata)}"
+            raise TypeError(msg)
+        if len(bytedata) != CHR_DATA_LENGTH:
+            msg = "Bytes list must contain exactly 8 values"
+            raise ValueError(msg)
         self.write(0x40 | (int(slot) << 3), mode=0)
         for byte in bytedata:
             self.write(byte, mode=1)
 
-    def position_text(self, text: str, line: int, column: int = 1):
+    def position_text(self, text: str, line: int, column: int = 1) -> None:
         """
         Display text at a given position on the LCD screen.
 
-        Parameters:
-            * text: The string to display on the LCD
-            * line: The line to display the text
-            * column: The starting column for the text
+        Parameters
+        ----------
+        text: The string to display on the LCD
+        line: The line to display the text
+        column: The starting column for the text
 
         Note: both line and column are 1-based numbers, NOT 0-based
         """
-        if line < 1 or line > self.rows:
-            raise ValueError(f"Line {line} out of range")
-        if column < 1 or column > self.width:
-            raise ValueError(f"Column {column} out of range")
+        if not 1 <= line <= self.rows:
+            msg = f"Line {line} out of range"
+            raise ValueError(msg)
+        if not 0 <= column <= self.width:
+            msg = f"Column {column} out of range"
+            raise ValueError(msg)
         self.write(LINES.get(line, LINES[1] | (column - 1)))
         for idx, ch in enumerate(text):
             self.write(ord(ch), mode=1)
             if column + idx > self.width:
                 break
 
-    def toggle_backlight(self):
+    def toggle_backlight(self) -> None:
         """
         Toggle the backlight.
         """
         self.backlight(not self.backlight_status)
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clear the LCD and turn off the backlight.
         """
         super().clear()
         self.backlight(False)
+
+    def __str__(self) -> str:
+        name = self.__class__.__name__
+        addr = self.address
+        rows = self.rows
+        width = self.width
+        stat = self.backlight_status
+        return f"{name}(address={addr}, rows={rows}, width={width}, backlight_status={stat})"

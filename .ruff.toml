@@ -1,0 +1,33 @@
+line-length = 99
+exclude = [
+    "mypy",
+    "prototype",
+]
+
+[lint]
+select = ["ALL"]
+extend-select = ["ANN401"]
+ignore = [
+    "ANN002", "ANN003", "ANN101", "ANN102", # annotations for *args, **kwargs, self, cls
+    "D105",  # missing docstring in magic method
+    "D200",  # one-line docstring should fit on one line
+    "FIX002",  # don't warn on TODO comments
+    "S101", "S603", # flake8-bandit
+    "FBT003", # boolean positional value in function call (they're used in tkinter)
+    "PLR0913", # too many arguments in function definition (they're used in tkinter-derived classes)
+    "COM", # flake8-commas (trailing commas)
+    "TID", # flake8-tidy-imports (relative imports)
+    "TD", # flake8-todos (structured todo messages)
+    "ERA", # eradicate (commented-out code)
+    "RUF001", # ambiguous Unicode characters
+]
+
+[lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-dummy-args = true
+
+[lint.mccabe]
+max-complexity = 5
+
+[lint.pydocstyle]
+convention = "numpy"

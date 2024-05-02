@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: © 2024 Stacey Adams <stacey.belle.rose@gmail.com>
+# SPDX-License-Identifier: Unlicense
+liccheck >= 0.9.2
+mypy >= 1.5
+pycodestyle >= 2.11
+pydocstyle >= 6.2
+pyflakes >= 3.1
+pylint >= 3.0
+radon >= 6.0
+ruff >= 0.3
